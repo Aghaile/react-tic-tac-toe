@@ -3,8 +3,8 @@ import './App.css';
 
 import Board from './components/Board';
 
-const player_1 = 'X';
-const player_2 = 'O';
+const player1 = 'X';
+const player2 = 'O';
 
 const generateSquares = () => {
   const squares = [];
@@ -29,6 +29,11 @@ const App = () => {
   // This starts state off as a 2D array of JS objects with
   // empty value and unique ids.
   const [squares, setSquares] = useState(generateSquares());
+  const [currentPlayer, setCurrentPlayer] = useState(player1);
+  const [winner, setWinner] = useState(null);
+
+  // let currentPlayer = player_1;
+  // let winner = null;
 
   // Wave 2
   // You will need to create a method to change the square
@@ -78,17 +83,58 @@ const App = () => {
 
   const resetGame = () => {
     // Complete in Wave 4
+    let resetBoard = generateSquares();
+    setCurrentPlayer(player1);
+    setWinner(null);
+    setSquares(resetBoard);
   };
 
+  const onClickCallback = (id) => {
+    console.log('onclick', id);
+    setSquares((squares) => {
+      let newBoard = squares.map((square) => {
+        for (let property of square) {
+          if (property.id ===id && property.value === '') {
+            if (currentPlayer === player1) {
+              property.value = player1;
+            } else if (currentPlayer === player2) {
+              property.value = player2;
+            }
+          }
+        }
+
+        return square;
+      });
+
+      setWinner(checkForWinner());
+      return newBoard;
+    });
+
+    if (currentPlayer === player1) {
+      setCurrentPlayer(player2);
+    } else {
+      setCurrentPlayer(player1);
+    }
+  };
+
+  let header;
+  let boardCallback;
+  if (winner != null) {
+    header = <h2>Winner is {winner}</h2>;
+  } else {
+    header = <h2>The Current Player is {currentPlayer}</h2>;
+    boardCallback = onClickCallback;
+  }
+
   return (
-    <div className='App'>
-      <header className='App-header'>
+    <div className="App">
+      <header className="App-header">
         <h1>React Tic Tac Toe</h1>
-        <h2>The winner is ... -- Fill in for wave 3 </h2>
-        <button>Reset Game</button>
+        {header}
+        <button onClick={resetGame}>Reset Game</button>
       </header>
       <main>
-        <Board squares={squares} />
+        <Board onClickCallback={boardCallback} squares={squares} />
       </main>
     </div>
   );
